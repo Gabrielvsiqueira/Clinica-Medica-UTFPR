@@ -1,4 +1,4 @@
-package gui;
+package gui.agendamento;
 
 import entities.Consulta;
 import entities.Medico;
@@ -9,22 +9,15 @@ import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.awt.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-// Opcional: JDateChooser para seleção de datas (requer jcalendar)
-// import com.toedter.calendar.JDateChooser;
-
 public class AgendaMedicoView extends JDialog {
-
     private MedicoService medicoService;
     private ConsultaService consultaService;
-
     private JComboBox<Medico> medicoComboBox;
-    // private JDateChooser dataChooser; // Se usar JDateChooser
-    private JTextField dataField; // Alternativa para data
+    private JTextField dataField;
     private JButton buscarButton;
 
     private JTable agendaTable;
@@ -37,18 +30,15 @@ public class AgendaMedicoView extends JDialog {
         initComponents();
         setupLayout();
         addListeners();
-        loadMedicos(); // Carrega médicos no combobox
+        loadMedicos();
         pack();
         setLocationRelativeTo(owner);
     }
 
     private void initComponents() {
         medicoComboBox = new JComboBox<>();
-        // dataChooser = new JDateChooser(LocalDate.now().toDate()); // Se usar JDateChooser
-        // dataChooser.setDateFormatString("dd/MM/yyyy");
         dataField = new JTextField(LocalDate.now().toString(), 10); // Data atual por padrão
         buscarButton = new JButton("Buscar Agenda");
-
         agendaTableModel = new AgendaMedicoTableModel();
         agendaTable = new JTable(agendaTableModel);
         agendaTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -59,7 +49,6 @@ public class AgendaMedicoView extends JDialog {
         filterPanel.add(new JLabel("Médico:"));
         filterPanel.add(medicoComboBox);
         filterPanel.add(new JLabel("Data (AAAA-MM-DD):"));
-        // if (dataChooser != null) filterPanel.add(dataChooser); else 
         filterPanel.add(dataField);
         filterPanel.add(buscarButton);
 
@@ -76,7 +65,7 @@ public class AgendaMedicoView extends JDialog {
         try {
             List<Medico> medicos = medicoService.listarTodosMedicos();
             medicoComboBox.removeAllItems();
-            medicoComboBox.addItem(null); // Opção para "Nenhum selecionado"
+            medicoComboBox.addItem(null);
             for (Medico medico : medicos) {
                 medicoComboBox.addItem(medico);
             }
@@ -93,19 +82,15 @@ public class AgendaMedicoView extends JDialog {
                 JOptionPane.showMessageDialog(this, "Selecione um médico para buscar a agenda.", "Aviso", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-
             LocalDate dataAgenda;
             try {
-                // dataAgenda = dataChooser.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(); // Se usar JDateChooser
                 dataAgenda = LocalDate.parse(dataField.getText());
             } catch (DateTimeParseException e) {
                 JOptionPane.showMessageDialog(this, "Formato de data inválido. Use AAAA-MM-DD.", "Erro de Formato", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-
             List<Consulta> consultas = consultaService.buscarAgendaMedico(selectedMedico.getId(), dataAgenda.atStartOfDay());
             agendaTableModel.setConsultas(consultas);
-
             if (consultas.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Nenhuma consulta encontrada para o médico e data selecionados.", "Informação", JOptionPane.INFORMATION_MESSAGE);
             }

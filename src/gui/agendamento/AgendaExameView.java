@@ -1,32 +1,25 @@
-package gui;
+package gui.agendamento;
+
+import javax.swing.*;
+import javax.swing.table.AbstractTableModel;
+import java.awt.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
 
 import entities.AgendamentoExame;
 import entities.Exame;
 import services.AgendamentoExameService;
 import services.ExameService;
 
-import javax.swing.*;
-import javax.swing.table.AbstractTableModel;
-import java.awt.*;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.List;
-
-// Opcional: JDateChooser para seleção de datas (requer jcalendar)
-// import com.toedter.calendar.JDateChooser;
-
 public class AgendaExameView extends JDialog {
 
     private ExameService exameService;
     private AgendamentoExameService agendamentoExameService;
-
     private JComboBox<Exame> exameComboBox;
-    // private JDateChooser dataChooser; // Se usar JDateChooser
-    private JTextField dataField; // Alternativa para data
+    private JTextField dataField;
     private JButton buscarButton;
-
     private JTable agendaTable;
     private AgendaExameTableModel agendaTableModel;
 
@@ -37,16 +30,14 @@ public class AgendaExameView extends JDialog {
         initComponents();
         setupLayout();
         addListeners();
-        loadExames(); // Carrega exames no combobox
+        loadExames();
         pack();
         setLocationRelativeTo(owner);
     }
 
     private void initComponents() {
         exameComboBox = new JComboBox<>();
-        // dataChooser = new JDateChooser(LocalDate.now().toDate()); // Se usar JDateChooser
-        // dataChooser.setDateFormatString("dd/MM/yyyy");
-        dataField = new JTextField(LocalDate.now().toString(), 10); // Data atual por padrão
+        dataField = new JTextField(LocalDate.now().toString(), 10);
         buscarButton = new JButton("Buscar Agenda");
 
         agendaTableModel = new AgendaExameTableModel();
@@ -59,7 +50,6 @@ public class AgendaExameView extends JDialog {
         filterPanel.add(new JLabel("Exame:"));
         filterPanel.add(exameComboBox);
         filterPanel.add(new JLabel("Data (AAAA-MM-DD):"));
-        // if (dataChooser != null) filterPanel.add(dataChooser); else
         filterPanel.add(dataField);
         filterPanel.add(buscarButton);
 
@@ -76,7 +66,7 @@ public class AgendaExameView extends JDialog {
         try {
             List<Exame> exames = exameService.listarTodosExames();
             exameComboBox.removeAllItems();
-            exameComboBox.addItem(null); // Opção para "Nenhum selecionado"
+            exameComboBox.addItem(null);
             for (Exame exame : exames) {
                 exameComboBox.addItem(exame);
             }
@@ -96,7 +86,6 @@ public class AgendaExameView extends JDialog {
 
             LocalDate dataAgenda;
             try {
-                // dataAgenda = dataChooser.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(); // Se usar JDateChooser
                 dataAgenda = LocalDate.parse(dataField.getText());
             } catch (DateTimeParseException e) {
                 JOptionPane.showMessageDialog(this, "Formato de data inválido. Use AAAA-MM-DD.", "Erro de Formato", JOptionPane.WARNING_MESSAGE);

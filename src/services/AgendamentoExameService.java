@@ -1,5 +1,9 @@
 package services;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.math.BigDecimal;
+
 import dao.AgendamentoExameDAO;
 import dao.ExameDAO;
 import dao.MedicoDAO;
@@ -8,10 +12,6 @@ import entities.AgendamentoExame;
 import entities.Exame;
 import entities.Medico;
 import entities.Paciente;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.math.BigDecimal;
 
 public class AgendamentoExameService {
 
@@ -48,13 +48,11 @@ public class AgendamentoExameService {
             throw new IllegalArgumentException("Exame informado não encontrado.");
         }
         agendamento.setExame(exameExistente);
-
         Paciente pacienteExistente = pacienteDAO.buscarPacienteId(agendamento.getPaciente().getId());
         if (pacienteExistente == null) {
             throw new IllegalArgumentException("Paciente informado não encontrado.");
         }
         agendamento.setPaciente(pacienteExistente);
-
         if (agendamento.getMedicoRequisitante() != null && agendamento.getMedicoRequisitante().getId() != null) {
             Medico medicoRequisitanteExistente = medicoDAO.buscarMedicoPorId(agendamento.getMedicoRequisitante().getId());
             if (medicoRequisitanteExistente == null) {
@@ -62,18 +60,15 @@ public class AgendamentoExameService {
             }
             agendamento.setMedicoRequisitante(medicoRequisitanteExistente);
         }
-
-        LocalDateTime fimPrevisto = agendamento.getDataRealizacao().plusMinutes(60);
-
+        LocalDateTime fimPrevisto = agendamento.getDataRealizacao().plusMinutes(60); // Ajuste a duração se necessário
         if (agendamentoExameDAO.existeSobreposicao(agendamento.getExame().getId(), agendamento.getDataRealizacao(), fimPrevisto, agendamento.getId())) {
             throw new IllegalStateException("Já existe um agendamento para este exame neste horário.");
         }
-
         if (agendamento.getId() == null) {
             agendamento.setStatus("Agendado");
-            agendamentoExameDAO.cadastrarAgendamento(agendamento);
+            agendamentoExameDAO.inserir(agendamento);
         } else {
-            agendamentoExameDAO.atualizarAgendamento(agendamento);
+            agendamentoExameDAO.atualizar(agendamento);
         }
     }
 
@@ -81,7 +76,7 @@ public class AgendamentoExameService {
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("ID do agendamento de exame inválido.");
         }
-        return agendamentoExameDAO.buscarAgendamentoId(id);
+        return agendamentoExameDAO.buscarPorId(id);
     }
 
     public List<AgendamentoExame> buscarAgendaExame(Integer exameId, LocalDateTime data) {
@@ -105,7 +100,7 @@ public class AgendamentoExameService {
         if (agendamentoId == null || agendamentoId <= 0) {
             throw new IllegalArgumentException("ID do agendamento de exame inválido para marcar como realizado.");
         }
-        AgendamentoExame agendamento = agendamentoExameDAO.buscarAgendamentoId(agendamentoId);
+        AgendamentoExame agendamento = agendamentoExameDAO.buscarPorId(agendamentoId);
         if (agendamento == null) {
             throw new IllegalArgumentException("Agendamento de exame não encontrado.");
         }
@@ -113,14 +108,14 @@ public class AgendamentoExameService {
             throw new IllegalStateException("O agendamento não está no status 'Agendado' para ser marcado como realizado.");
         }
         agendamento.setStatus("Realizado");
-        agendamentoExameDAO.atualizarAgendamento(agendamento);
+        agendamentoExameDAO.atualizar(agendamento);
     }
 
     public void cancelarAgendamentoExame(Integer agendamentoId) {
         if (agendamentoId == null || agendamentoId <= 0) {
             throw new IllegalArgumentException("ID do agendamento de exame inválido para cancelar.");
         }
-        AgendamentoExame agendamento = agendamentoExameDAO.buscarAgendamentoId(agendamentoId);
+        AgendamentoExame agendamento = agendamentoExameDAO.buscarPorId(agendamentoId);
         if (agendamento == null) {
             throw new IllegalArgumentException("Agendamento de exame não encontrado.");
         }
@@ -128,17 +123,18 @@ public class AgendamentoExameService {
             throw new IllegalStateException("Não é possível cancelar um agendamento já realizado.");
         }
         agendamento.setStatus("Cancelado");
-        agendamentoExameDAO.atualizarAgendamento(agendamento);
+        agendamentoExameDAO.atualizar(agendamento);
     }
 
     public void deletarAgendamentoExame(Integer id) {
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("ID do agendamento de exame inválido para exclusão.");
         }
-        AgendamentoExame agendamento = agendamentoExameDAO.buscarAgendamentoId(id);
+        // Regra de negócio: pode deletar um agendamento já realizado? Geralmente não.
+        AgendamentoExame agendamento = agendamentoExameDAO.buscarPorId(id);
         if (agendamento != null && "Realizado".equals(agendamento.getStatus())) {
             throw new IllegalStateException("Não é possível deletar um agendamento de exame já realizado.");
         }
-        agendamentoExameDAO.deletarAgendamento(id);
+        agendamentoExameDAO.deletar(id);
     }
 }

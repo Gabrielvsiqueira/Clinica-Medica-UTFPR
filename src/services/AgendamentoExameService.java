@@ -28,7 +28,6 @@ public class AgendamentoExameService {
     }
 
     public void agendarExame(AgendamentoExame agendamento) {
-        // Validações de campos obrigatórios
         if (agendamento.getExame() == null || agendamento.getExame().getId() == null) {
             throw new IllegalArgumentException("O exame é obrigatório.");
         }
@@ -44,42 +43,37 @@ public class AgendamentoExameService {
         if (agendamento.getValorPago() == null || agendamento.getValorPago().compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("O valor a ser pago deve ser um número positivo.");
         }
-
-        // Valida se as entidades existem
-        Exame exameExistente = exameDAO.buscarPorId(agendamento.getExame().getId());
+        Exame exameExistente = exameDAO.buscarExameId(agendamento.getExame().getId());
         if (exameExistente == null) {
             throw new IllegalArgumentException("Exame informado não encontrado.");
         }
         agendamento.setExame(exameExistente);
 
-        Paciente pacienteExistente = pacienteDAO.buscarPorId(agendamento.getPaciente().getId());
+        Paciente pacienteExistente = pacienteDAO.buscarPacienteId(agendamento.getPaciente().getId());
         if (pacienteExistente == null) {
             throw new IllegalArgumentException("Paciente informado não encontrado.");
         }
         agendamento.setPaciente(pacienteExistente);
 
         if (agendamento.getMedicoRequisitante() != null && agendamento.getMedicoRequisitante().getId() != null) {
-            Medico medicoRequisitanteExistente = medicoDAO.buscarPorId(agendamento.getMedicoRequisitante().getId());
+            Medico medicoRequisitanteExistente = medicoDAO.buscarMedicoPorId(agendamento.getMedicoRequisitante().getId());
             if (medicoRequisitanteExistente == null) {
                 throw new IllegalArgumentException("Médico requisitante informado não encontrado.");
             }
             agendamento.setMedicoRequisitante(medicoRequisitanteExistente);
         }
 
-        // Lógica de Negócio: Verificar sobreposição de horários para o EXAME ESPECÍFICO
-        // Assumindo uma duração padrão para o exame, por exemplo, 60 minutos
-        LocalDateTime fimPrevisto = agendamento.getDataRealizacao().plusMinutes(60); // Ajuste a duração se necessário
+        LocalDateTime fimPrevisto = agendamento.getDataRealizacao().plusMinutes(60);
 
         if (agendamentoExameDAO.existeSobreposicao(agendamento.getExame().getId(), agendamento.getDataRealizacao(), fimPrevisto, agendamento.getId())) {
             throw new IllegalStateException("Já existe um agendamento para este exame neste horário.");
         }
 
-        // Define o status inicial
         if (agendamento.getId() == null) {
             agendamento.setStatus("Agendado");
-            agendamentoExameDAO.inserir(agendamento);
+            agendamentoExameDAO.cadastrarAgendamento(agendamento);
         } else {
-            agendamentoExameDAO.atualizar(agendamento);
+            agendamentoExameDAO.atualizarAgendamento(agendamento);
         }
     }
 
@@ -87,7 +81,7 @@ public class AgendamentoExameService {
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("ID do agendamento de exame inválido.");
         }
-        return agendamentoExameDAO.buscarPorId(id);
+        return agendamentoExameDAO.buscarAgendamentoId(id);
     }
 
     public List<AgendamentoExame> buscarAgendaExame(Integer exameId, LocalDateTime data) {
@@ -111,7 +105,7 @@ public class AgendamentoExameService {
         if (agendamentoId == null || agendamentoId <= 0) {
             throw new IllegalArgumentException("ID do agendamento de exame inválido para marcar como realizado.");
         }
-        AgendamentoExame agendamento = agendamentoExameDAO.buscarPorId(agendamentoId);
+        AgendamentoExame agendamento = agendamentoExameDAO.buscarAgendamentoId(agendamentoId);
         if (agendamento == null) {
             throw new IllegalArgumentException("Agendamento de exame não encontrado.");
         }
@@ -119,14 +113,14 @@ public class AgendamentoExameService {
             throw new IllegalStateException("O agendamento não está no status 'Agendado' para ser marcado como realizado.");
         }
         agendamento.setStatus("Realizado");
-        agendamentoExameDAO.atualizar(agendamento);
+        agendamentoExameDAO.atualizarAgendamento(agendamento);
     }
 
     public void cancelarAgendamentoExame(Integer agendamentoId) {
         if (agendamentoId == null || agendamentoId <= 0) {
             throw new IllegalArgumentException("ID do agendamento de exame inválido para cancelar.");
         }
-        AgendamentoExame agendamento = agendamentoExameDAO.buscarPorId(agendamentoId);
+        AgendamentoExame agendamento = agendamentoExameDAO.buscarAgendamentoId(agendamentoId);
         if (agendamento == null) {
             throw new IllegalArgumentException("Agendamento de exame não encontrado.");
         }
@@ -134,18 +128,17 @@ public class AgendamentoExameService {
             throw new IllegalStateException("Não é possível cancelar um agendamento já realizado.");
         }
         agendamento.setStatus("Cancelado");
-        agendamentoExameDAO.atualizar(agendamento);
+        agendamentoExameDAO.atualizarAgendamento(agendamento);
     }
 
     public void deletarAgendamentoExame(Integer id) {
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("ID do agendamento de exame inválido para exclusão.");
         }
-        // Regra de negócio: pode deletar um agendamento já realizado? Geralmente não.
-        AgendamentoExame agendamento = agendamentoExameDAO.buscarPorId(id);
+        AgendamentoExame agendamento = agendamentoExameDAO.buscarAgendamentoId(id);
         if (agendamento != null && "Realizado".equals(agendamento.getStatus())) {
             throw new IllegalStateException("Não é possível deletar um agendamento de exame já realizado.");
         }
-        agendamentoExameDAO.deletar(id);
+        agendamentoExameDAO.deletarAgendamento(id);
     }
 }

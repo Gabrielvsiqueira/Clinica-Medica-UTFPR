@@ -6,7 +6,8 @@ import dao.PacienteDAO;
 import entities.Consulta;
 import entities.Medico;
 import entities.Paciente;
-
+import java.io.IOException;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -23,7 +24,6 @@ public class ConsultaService {
     }
 
     public void agendarConsulta(Consulta consulta) {
-        // Validações de campos obrigatórios
         if (consulta.getPaciente() == null || consulta.getPaciente().getId() == null) {
             throw new IllegalArgumentException("O paciente da consulta é obrigatório.");
         }
@@ -36,34 +36,27 @@ public class ConsultaService {
         if (consulta.getDataHora().isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("Não é possível agendar consulta no passado.");
         }
-
-        // Valida se paciente e médico existem
-        Paciente pacienteExistente = pacienteDAO.buscarPorId(consulta.getPaciente().getId());
+        Paciente pacienteExistente = pacienteDAO.buscarPacienteId(consulta.getPaciente().getId());
         if (pacienteExistente == null) {
             throw new IllegalArgumentException("Paciente informado não encontrado.");
         }
-        consulta.setPaciente(pacienteExistente); // Garante que o objeto paciente esteja completo
+        consulta.setPaciente(pacienteExistente);
 
-        Medico medicoExistente = medicoDAO.buscarPorId(consulta.getMedico().getId());
+        Medico medicoExistente = medicoDAO.buscarMedicoPorId(consulta.getMedico().getId());
         if (medicoExistente == null) {
             throw new IllegalArgumentException("Médico informado não encontrado.");
         }
-        consulta.setMedico(medicoExistente); // Garante que o objeto médico esteja completo
-
-        // Lógica de Negócio: Verificar sobreposição de horários
-        // Assumindo uma duração padrão de consulta para a verificação de sobreposição, por exemplo, 30 minutos
+        consulta.setMedico(medicoExistente);
         LocalDateTime fimPrevisto = consulta.getDataHora().plusMinutes(30);
 
-        if (consultaDAO.existeSobreposicao(consulta.getMedico().getId(), consulta.getDataHora(), fimPrevisto, consulta.getId())) {
+        if (consultaDAO.existeSobreposicaoConsulta(consulta.getMedico().getId(), consulta.getDataHora(), fimPrevisto, consulta.getId())) {
             throw new IllegalStateException("O médico já possui uma consulta agendada neste horário.");
         }
-
-        // Define o status inicial
         if (consulta.getId() == null) {
             consulta.setStatus("Agendada");
-            consultaDAO.inserir(consulta);
+            consultaDAO.cadastrarConsulta(consulta);
         } else {
-            consultaDAO.atualizar(consulta);
+            consultaDAO.atualizarConsulta(consulta);
         }
     }
 
@@ -71,7 +64,7 @@ public class ConsultaService {
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("ID da consulta inválido.");
         }
-        return consultaDAO.buscarPorId(id);
+        return consultaDAO.buscarConsultaId(id);
     }
 
     public List<Consulta> buscarAgendaMedico(Integer medicoId, LocalDateTime data) {
@@ -95,7 +88,7 @@ public class ConsultaService {
         if (consultaId == null || consultaId <= 0) {
             throw new IllegalArgumentException("ID da consulta inválido para marcar como concluída.");
         }
-        Consulta consulta = consultaDAO.buscarPorId(consultaId);
+        Consulta consulta = consultaDAO.buscarConsultaId(consultaId);
         if (consulta == null) {
             throw new IllegalArgumentException("Consulta não encontrada.");
         }
@@ -103,14 +96,14 @@ public class ConsultaService {
             throw new IllegalStateException("A consulta não está no status 'Agendada' para ser marcada como concluída.");
         }
         consulta.setStatus("Concluída");
-        consultaDAO.atualizar(consulta);
+        consultaDAO.atualizarConsulta(consulta);
     }
 
     public void cancelarConsulta(Integer consultaId) {
         if (consultaId == null || consultaId <= 0) {
             throw new IllegalArgumentException("ID da consulta inválido para cancelar.");
         }
-        Consulta consulta = consultaDAO.buscarPorId(consultaId);
+        Consulta consulta = consultaDAO.buscarConsultaId(consultaId);
         if (consulta == null) {
             throw new IllegalArgumentException("Consulta não encontrada.");
         }
@@ -118,18 +111,17 @@ public class ConsultaService {
             throw new IllegalStateException("Não é possível cancelar uma consulta já concluída.");
         }
         consulta.setStatus("Cancelada");
-        consultaDAO.atualizar(consulta);
+        consultaDAO.atualizarConsulta(consulta);
     }
 
-    public void deletarConsulta(Integer id) {
+    public void deletarConsulta(Integer id) throws SQLException, IOException {
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("ID da consulta inválido para exclusão.");
         }
-        // Aqui você pode adicionar regras de negócio, ex: só pode deletar se não for "Concluída"
-        Consulta consulta = consultaDAO.buscarPorId(id);
+        Consulta consulta = consultaDAO.buscarConsultaId(id);
         if (consulta != null && "Concluída".equals(consulta.getStatus())) {
             throw new IllegalStateException("Não é possível deletar uma consulta já concluída.");
         }
-        consultaDAO.deletar(id);
+        consultaDAO.deletarConsulta(id);
     }
 }

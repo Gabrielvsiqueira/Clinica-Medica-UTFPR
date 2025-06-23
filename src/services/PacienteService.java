@@ -2,12 +2,10 @@ package services;
 
 import dao.PacienteDAO;
 import entities.Paciente;
-
 import java.time.LocalDate;
 import java.util.List;
 
 public class PacienteService {
-
     private PacienteDAO pacienteDAO;
 
     public PacienteService() {
@@ -15,7 +13,6 @@ public class PacienteService {
     }
 
     public void salvarPaciente(Paciente paciente) {
-        // Validações de campos obrigatórios
         if (paciente.getNome() == null || paciente.getNome().trim().isEmpty()) {
             throw new IllegalArgumentException("O nome do paciente é obrigatório.");
         }
@@ -31,12 +28,10 @@ public class PacienteService {
         if (paciente.getTelefone() == null || paciente.getTelefone().trim().isEmpty()) {
             throw new IllegalArgumentException("O telefone do paciente é obrigatório.");
         }
-        // Mais validações (formato de telefone, email, etc.)
-
         if (paciente.getId() == null) {
-            pacienteDAO.inserir(paciente);
+            pacienteDAO.cadastrarPaciente(paciente);
         } else {
-            pacienteDAO.atualizar(paciente);
+            pacienteDAO.atualizarPaciente(paciente);
         }
     }
 
@@ -44,7 +39,7 @@ public class PacienteService {
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("ID do paciente inválido.");
         }
-        return pacienteDAO.buscarPorId(id);
+        return pacienteDAO.buscarPacienteId(id);
     }
 
     public List<Paciente> listarTodosPacientes() {
@@ -55,11 +50,6 @@ public class PacienteService {
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("ID do paciente inválido para exclusão.");
         }
-        // Lógica de negócio: Verificar se o paciente possui consultas ou exames agendados/realizados
-        // (Isso exigiria métodos nos DAOs de Consulta e AgendamentoExame para contar por paciente)
-        // if (new ConsultaDAO().contarConsultasPorPaciente(id) > 0 || new AgendamentoExameDAO().contarAgendamentosPorPaciente(id) > 0) {
-        //     throw new IllegalStateException("Não é possível excluir paciente com histórico de consultas/exames.");
-        // }
-        pacienteDAO.deletar(id);
+        pacienteDAO.deletarPaciente(id);
     }
 }

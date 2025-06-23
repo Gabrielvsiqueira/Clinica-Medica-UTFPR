@@ -1,13 +1,20 @@
 package gui;
 
+import gui.agendamento.AgendaExameView;
+import gui.agendamento.AgendaMedicoView;
+import gui.agendamento.AgendarConsultaDialog;
+import gui.agendamento.AgendarExameDialog;
+import gui.cadastro.CadastroEspecialidade;
+import gui.cadastro.CadastroExame;
+import gui.cadastro.CadastroMedico;
+import gui.cadastro.CadastroPaciente;
+
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
-public class ClinicaFrame extends JFrame {
+public class Clinica extends JFrame {
 
-    public ClinicaFrame() {
+    public Clinica() {
         super("Sistema de Gestão de Clínica");
         initComponents();
         setupLayout();
@@ -19,7 +26,6 @@ public class ClinicaFrame extends JFrame {
     private void initComponents() {
         JMenuBar menuBar = new JMenuBar();
 
-        // --- Menu Cadastros ---
         JMenu cadastroMenu = new JMenu("Cadastros");
         JMenuItem pacientesMenuItem = new JMenuItem("Pacientes");
         JMenuItem medicosMenuItem = new JMenuItem("Médicos");
@@ -31,24 +37,22 @@ public class ClinicaFrame extends JFrame {
         cadastroMenu.add(especialidadesMenuItem);
         cadastroMenu.add(examesMenuItem);
 
-        // --- Menu Agendamentos ---
         JMenu agendamentosMenu = new JMenu("Agendamentos");
         JMenuItem agendarConsultaMenuItem = new JMenuItem("Agendar Consulta");
         JMenuItem agendarExameMenuItem = new JMenuItem("Agendar Exame");
-        JMenuItem agendaMedicoMenuItem = new JMenuItem("Agenda do Médico"); // Adicionado
-        JMenuItem agendaExameMenuItem = new JMenuItem("Agenda do Exame");   // Adicionado
+        JMenuItem agendaMedicoMenuItem = new JMenuItem("Agenda do Médico");
+        JMenuItem agendaExameMenuItem = new JMenuItem("Agenda do Exame");
 
         agendamentosMenu.add(agendarConsultaMenuItem);
         agendamentosMenu.add(agendarExameMenuItem);
         agendamentosMenu.addSeparator();
-        agendamentosMenu.add(agendaMedicoMenuItem); // Adicionado
-        agendamentosMenu.add(agendaExameMenuItem);   // Adicionado
+        agendamentosMenu.add(agendaMedicoMenuItem);
+        agendamentosMenu.add(agendaExameMenuItem);
 
-        // --- Menu Relatórios ---
         JMenu relatoriosMenu = new JMenu("Relatórios");
-        JMenuItem historicoPacienteMenuItem = new JMenuItem("Histórico do Paciente"); // Adicionado
+        JMenuItem historicoPacienteMenuItem = new JMenuItem("Histórico do Paciente");
 
-        relatoriosMenu.add(historicoPacienteMenuItem); // Adicionado
+        relatoriosMenu.add(historicoPacienteMenuItem);
 
         menuBar.add(cadastroMenu);
         menuBar.add(agendamentosMenu);
@@ -56,16 +60,12 @@ public class ClinicaFrame extends JFrame {
 
         setJMenuBar(menuBar);
 
-        // --- Listeners para os itens de menu ---
-        pacientesMenuItem.addActionListener(e -> new PacienteFormFrame().setVisible(true));
-        medicosMenuItem.addActionListener(e -> new MedicoFormFrame().setVisible(true));
-        especialidadesMenuItem.addActionListener(e -> new EspecialidadeFormFrame().setVisible(true));
-        examesMenuItem.addActionListener(e -> new ExameFormFrame().setVisible(true));
-
+        pacientesMenuItem.addActionListener(e -> new CadastroPaciente().setVisible(true));
+        medicosMenuItem.addActionListener(e -> new CadastroMedico().setVisible(true));
+        especialidadesMenuItem.addActionListener(e -> new CadastroEspecialidade().setVisible(true));
+        examesMenuItem.addActionListener(e -> new CadastroExame().setVisible(true));
         agendarConsultaMenuItem.addActionListener(e -> new AgendarConsultaDialog(this).setVisible(true));
         agendarExameMenuItem.addActionListener(e -> new AgendarExameDialog(this).setVisible(true));
-
-        // Adicionados os listeners para as novas telas de visualização/relatório
         agendaMedicoMenuItem.addActionListener(e -> new AgendaMedicoView(this).setVisible(true));
         agendaExameMenuItem.addActionListener(e -> new AgendaExameView(this).setVisible(true));
         historicoPacienteMenuItem.addActionListener(e -> new HistoricoPacienteView(this).setVisible(true));
@@ -80,7 +80,7 @@ public class ClinicaFrame extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            new ClinicaFrame().setVisible(true);
+            new Clinica().setVisible(true);
         });
     }
 }

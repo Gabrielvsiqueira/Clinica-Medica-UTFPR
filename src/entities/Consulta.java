@@ -1,16 +1,13 @@
 package entities;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class Consulta implements Serializable {
-    private static final long serialVersionUID = 1L;
-
-    private Integer id; // Mapeia para id_consulta
-    private Paciente paciente; // Mapeia para fk_paciente
-    private Medico medico; // Mapeia para fk_medico
-    private LocalDateTime dataHora; // Mapeia para horario_consulta
+public class Consulta {
+    private Integer id;
+    private LocalDateTime dataHora;
     private String status;
+    private Paciente paciente;
+    private Medico medico;
 
     public Consulta() {
     }
@@ -39,25 +36,5 @@ public class Consulta implements Serializable {
         return "Consulta [id=" + id + ", paciente=" + (paciente != null ? paciente.getNome() : "N/A") +
                 ", medico=" + (medico != null ? medico.getNomeCompleto() : "N/A") +
                 ", dataHora=" + dataHora + ", status=" + status + "]";
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
-        Consulta other = (Consulta) obj;
-        if (id == null) {
-            if (other.id != null) return false;
-        } else if (!id.equals(other.id)) return false;
-        return true;
     }
 }

@@ -1,16 +1,12 @@
 package entities;
 
-import java.io.Serializable;
-
-public class Medico implements Serializable {
-    private static final long serialVersionUID = 1L;
-
-    private Integer id; // Mapeia para medico_id
-    private Integer crm; // CRM é INT no seu DB, então use Integer aqui
-    private String nomeCompleto; // Mapeia para nome (coluna no DB)
+public class Medico {
+    private Integer id;
+    private Integer crm;
+    private String nomeCompleto;
     private String endereco;
-    private String telefone; // Mapeia para telefone (STRING para VARCHAR)
-    private Especialidade especialidade; // Mapeia para fk_especialidade
+    private String telefone;
+    private Especialidade especialidade;
 
     public Medico() {
     }
@@ -27,7 +23,7 @@ public class Medico implements Serializable {
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
     public Integer getCrm() { return crm; }
-    public void setCrm(Integer crm) { this.crm = crm; } // Usar setInt e getInt no DAO
+    public void setCrm(Integer crm) { this.crm = crm; }
     public String getNomeCompleto() { return nomeCompleto; }
     public void setNomeCompleto(String nomeCompleto) { this.nomeCompleto = nomeCompleto; }
     public String getEndereco() { return endereco; }
@@ -40,29 +36,5 @@ public class Medico implements Serializable {
     @Override
     public String toString() {
         return "Medico [id=" + id + ", crm=" + crm + ", nomeCompleto=" + nomeCompleto + ", especialidade=" + (especialidade != null ? especialidade.getNome() : "N/A") + "]";
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        result = prime * result + ((crm == null) ? 0 : crm.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
-        Medico other = (Medico) obj;
-        if (id == null) {
-            if (other.id != null) return false;
-        } else if (!id.equals(other.id)) return false;
-        if (crm == null) {
-            if (other.crm != null) return false;
-        } else if (!crm.equals(other.crm)) return false;
-        return true;
     }
 }

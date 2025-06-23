@@ -1,8 +1,5 @@
 package dao;
 
-import entities.Especialidade;
-import entities.Medico;
-
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,24 +9,27 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import entities.Especialidade;
+import entities.Medico;
+
 public class MedicoDAO {
 
-    public void inserir(Medico medico) {
+    public void cadastrarMedico(Medico medico) {
         String sql = "INSERT INTO Medico (crm, nome, endereco, telefone, fk_especialidade) VALUES (?, ?, ?, ?, ?)"; // Ajustado
         try (Connection conn = BancoDados.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            stmt.setInt(1, medico.getCrm()); // Usar setInt para CRM
-            stmt.setString(2, medico.getNomeCompleto()); // Mapeia nomeCompleto para 'nome'
+            stmt.setInt(1, medico.getCrm());
+            stmt.setString(2, medico.getNomeCompleto());
             stmt.setString(3, medico.getEndereco());
-            stmt.setString(4, medico.getTelefone()); // Assumindo String
-            stmt.setInt(5, medico.getEspecialidade().getId()); // Mapeia para fk_especialidade
+            stmt.setString(4, medico.getTelefone());
+            stmt.setInt(5, medico.getEspecialidade().getId());
             int affectedRows = stmt.executeUpdate();
 
             if (affectedRows > 0) {
                 try (ResultSet rs = stmt.getGeneratedKeys()) {
                     if (rs.next()) {
-                        medico.setId(rs.getInt(1)); // medico_id é o ID
+                        medico.setId(rs.getInt(1));
                     }
                 }
                 System.out.println("Médico inserido com sucesso! ID: " + medico.getId());
@@ -42,7 +42,7 @@ public class MedicoDAO {
         }
     }
 
-    public Medico buscarPorId(Integer id) {
+    public Medico buscarMedicoPorId(Integer id) {
         String sql = "SELECT m.medico_id, m.crm, m.nome, m.endereco, m.telefone, e.cod_especialidade AS especialidade_id, e.especialidade AS especialidade_nome " + // Ajustado
                 "FROM Medico m INNER JOIN Especialidade e ON m.fk_especialidade = e.cod_especialidade WHERE m.medico_id = ?"; // Ajustado
         Medico medico = null;
@@ -54,14 +54,14 @@ public class MedicoDAO {
                 if (rs.next()) {
                     medico = new Medico();
                     medico.setId(rs.getInt("medico_id"));
-                    medico.setCrm(rs.getInt("crm")); // Usar getInt para CRM
-                    medico.setNomeCompleto(rs.getString("nome")); // Mapeia 'nome' para nomeCompleto
+                    medico.setCrm(rs.getInt("crm"));
+                    medico.setNomeCompleto(rs.getString("nome"));
                     medico.setEndereco(rs.getString("endereco"));
-                    medico.setTelefone(rs.getString("telefone")); // Assumindo String
+                    medico.setTelefone(rs.getString("telefone"));
 
                     Especialidade especialidade = new Especialidade();
                     especialidade.setId(rs.getInt("especialidade_id"));
-                    especialidade.setNome(rs.getString("especialidade_nome")); // Mapeia 'especialidade' para nome
+                    especialidade.setNome(rs.getString("especialidade_nome"));
                     medico.setEspecialidade(especialidade);
                 }
             }
@@ -73,13 +73,12 @@ public class MedicoDAO {
     }
 
     public Medico buscarPorCrm(Integer crm) { // CRM é Integer
-        String sql = "SELECT m.medico_id, m.crm, m.nome, m.endereco, m.telefone, e.cod_especialidade AS especialidade_id, e.especialidade AS especialidade_nome " + // Ajustado
-                "FROM Medico m INNER JOIN Especialidade e ON m.fk_especialidade = e.cod_especialidade WHERE m.crm = ?"; // Ajustado
+        String sql = "SELECT m.medico_id, m.crm, m.nome, m.endereco, m.telefone, e.cod_especialidade AS especialidade_id, e.especialidade AS especialidade_nome " + "FROM Medico m INNER JOIN Especialidade e ON m.fk_especialidade = e.cod_especialidade WHERE m.crm = ?";
         Medico medico = null;
         try (Connection conn = BancoDados.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setInt(1, crm); // Usar setInt para CRM
+            stmt.setInt(1, crm);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     medico = new Medico();
@@ -104,8 +103,7 @@ public class MedicoDAO {
 
 
     public List<Medico> buscarTodos() {
-        String sql = "SELECT m.medico_id, m.crm, m.nome, m.endereco, m.telefone, e.cod_especialidade AS especialidade_id, e.especialidade AS especialidade_nome " + // Ajustado
-                "FROM Medico m INNER JOIN Especialidade e ON m.fk_especialidade = e.cod_especialidade ORDER BY m.nome"; // Ajustado
+        String sql = "SELECT m.medico_id, m.crm, m.nome, m.endereco, m.telefone, e.cod_especialidade AS especialidade_id, e.especialidade AS especialidade_nome " + "FROM Medico m INNER JOIN Especialidade e ON m.fk_especialidade = e.cod_especialidade ORDER BY m.nome";
         List<Medico> medicos = new ArrayList<>();
         try (Connection conn = BancoDados.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -132,8 +130,8 @@ public class MedicoDAO {
         return medicos;
     }
 
-    public void atualizar(Medico medico) {
-        String sql = "UPDATE Medico SET crm = ?, nome = ?, endereco = ?, telefone = ?, fk_especialidade = ? WHERE medico_id = ?"; // Ajustado
+    public void atualizarMedico(Medico medico) {
+        String sql = "UPDATE Medico SET crm = ?, nome = ?, endereco = ?, telefone = ?, fk_especialidade = ? WHERE medico_id = ?";
         try (Connection conn = BancoDados.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -156,19 +154,11 @@ public class MedicoDAO {
         }
     }
 
-    public void deletar(Integer id) {
-        String sql = "DELETE FROM Medico WHERE medico_id = ?"; // Ajustado
+    public void deletarMedico(Integer id) {
+        String sql = "DELETE FROM Medico WHERE medico_id = ?";
         try (Connection conn = BancoDados.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setInt(1, id);
-            int affectedRows = stmt.executeUpdate();
-
-            if (affectedRows > 0) {
-                System.out.println("Médico deletado com sucesso! ID: " + id);
-            } else {
-                System.out.println("Nenhum médico encontrado com o ID: " + id);
-            }
         } catch (SQLException | IOException e) {
             System.err.println("Erro ao deletar médico: " + e.getMessage());
             e.printStackTrace();

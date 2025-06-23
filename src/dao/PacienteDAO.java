@@ -1,6 +1,5 @@
 package dao;
 
-import entities.Paciente;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Date;
@@ -11,26 +10,28 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import entities.Paciente;
+
 public class PacienteDAO {
 
-    public void inserir(Paciente paciente) {
+    public void cadastrarPaciente(Paciente paciente) {
         String sql = "INSERT INTO Paciente (nome, foto, data_nascimento, sexo, endereco, telefone, pagamento) VALUES (?, ?, ?, ?, ?, ?, ?)"; // Ajustado
         try (Connection conn = BancoDados.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, paciente.getNome());
-            stmt.setString(2, paciente.getFoto()); // Assumindo String para caminho/URL
+            stmt.setString(2, paciente.getFoto());
             stmt.setDate(3, Date.valueOf(paciente.getDataNascimento()));
             stmt.setString(4, paciente.getSexo());
             stmt.setString(5, paciente.getEndereco());
-            stmt.setString(6, paciente.getTelefone()); // Assumindo String para telefone
-            stmt.setString(7, paciente.getFormaPagamento()); // Mapeia formaPagamento para 'pagamento'
+            stmt.setString(6, paciente.getTelefone());
+            stmt.setString(7, paciente.getFormaPagamento());
             int affectedRows = stmt.executeUpdate();
 
             if (affectedRows > 0) {
                 try (ResultSet rs = stmt.getGeneratedKeys()) {
                     if (rs.next()) {
-                        paciente.setId(rs.getInt(1)); // paciente_id é o ID
+                        paciente.setId(rs.getInt(1));
                     }
                 }
                 System.out.println("Paciente inserido com sucesso! ID: " + paciente.getId());
@@ -43,7 +44,7 @@ public class PacienteDAO {
         }
     }
 
-    public Paciente buscarPorId(Integer id) {
+    public Paciente buscarPacienteId(Integer id) {
         String sql = "SELECT paciente_id, nome, foto, data_nascimento, sexo, endereco, telefone, pagamento FROM Paciente WHERE paciente_id = ?"; // Ajustado
         Paciente paciente = null;
         try (Connection conn = BancoDados.conectar();
@@ -96,7 +97,7 @@ public class PacienteDAO {
         return pacientes;
     }
 
-    public void atualizar(Paciente paciente) {
+    public void atualizarPaciente(Paciente paciente) {
         String sql = "UPDATE Paciente SET nome = ?, foto = ?, data_nascimento = ?, sexo = ?, endereco = ?, telefone = ?, pagamento = ? WHERE paciente_id = ?"; // Ajustado
         try (Connection conn = BancoDados.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -122,7 +123,7 @@ public class PacienteDAO {
         }
     }
 
-    public void deletar(Integer id) {
+    public void deletarPaciente(Integer id) {
         String sql = "DELETE FROM Paciente WHERE paciente_id = ?"; // Ajustado
         try (Connection conn = BancoDados.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql)) {

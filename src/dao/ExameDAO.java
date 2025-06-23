@@ -1,9 +1,6 @@
 package dao;
 
-import entities.Exame;
-
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,22 +9,24 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import entities.Exame;
+
 public class ExameDAO {
 
-    public void inserir(Exame exame) {
-        String sql = "INSERT INTO Exames (nome, valor, orientacoes) VALUES (?, ?, ?)"; // Ajustado
+    public void cadastrarExame(Exame exame) {
+        String sql = "INSERT INTO Exames (nome, valor, orientacoes) VALUES (?, ?, ?)";
         try (Connection conn = BancoDados.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, exame.getNome());
-            stmt.setBigDecimal(2, exame.getValor()); // Usar setBigDecimal
+            stmt.setBigDecimal(2, exame.getValor());
             stmt.setString(3, exame.getOrientacoes());
             int affectedRows = stmt.executeUpdate();
 
             if (affectedRows > 0) {
                 try (ResultSet rs = stmt.getGeneratedKeys()) {
                     if (rs.next()) {
-                        exame.setId(rs.getInt(1)); // cod_exame é o ID
+                        exame.setId(rs.getInt(1));
                     }
                 }
                 System.out.println("Exame inserido com sucesso! ID: " + exame.getId());
@@ -40,8 +39,8 @@ public class ExameDAO {
         }
     }
 
-    public Exame buscarPorId(Integer id) {
-        String sql = "SELECT cod_exame, nome, valor, orientacoes FROM Exames WHERE cod_exame = ?"; // Ajustado
+    public Exame buscarExameId(Integer id) {
+        String sql = "SELECT cod_exame, nome, valor, orientacoes FROM Exames WHERE cod_exame = ?";
         Exame exame = null;
         try (Connection conn = BancoDados.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -52,7 +51,7 @@ public class ExameDAO {
                     exame = new Exame();
                     exame.setId(rs.getInt("cod_exame"));
                     exame.setNome(rs.getString("nome"));
-                    exame.setValor(rs.getBigDecimal("valor")); // Usar getBigDecimal
+                    exame.setValor(rs.getBigDecimal("valor"));
                     exame.setOrientacoes(rs.getString("orientacoes"));
                 }
             }
@@ -63,8 +62,8 @@ public class ExameDAO {
         return exame;
     }
 
-    public List<Exame> buscarTodos() {
-        String sql = "SELECT cod_exame, nome, valor, orientacoes FROM Exames ORDER BY nome"; // Ajustado
+    public List<Exame> buscarTodosExames() {
+        String sql = "SELECT cod_exame, nome, valor, orientacoes FROM Exames ORDER BY nome";
         List<Exame> exames = new ArrayList<>();
         try (Connection conn = BancoDados.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -85,8 +84,8 @@ public class ExameDAO {
         return exames;
     }
 
-    public void atualizar(Exame exame) {
-        String sql = "UPDATE Exames SET nome = ?, valor = ?, orientacoes = ? WHERE cod_exame = ?"; // Ajustado
+    public void atualizarExame(Exame exame) {
+        String sql = "UPDATE Exames SET nome = ?, valor = ?, orientacoes = ? WHERE cod_exame = ?";
         try (Connection conn = BancoDados.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -107,8 +106,8 @@ public class ExameDAO {
         }
     }
 
-    public void deletar(Integer id) {
-        String sql = "DELETE FROM Exames WHERE cod_exame = ?"; // Ajustado
+    public void deletarExame(Integer id) {
+        String sql = "DELETE FROM Exames WHERE cod_exame = ?";
         try (Connection conn = BancoDados.conectar();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
